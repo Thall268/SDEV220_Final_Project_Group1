@@ -1,5 +1,6 @@
 SDEV220_Final_Project_Group1
 🐾 Bloodhound
+
 Bloodhound is a lightweight, GUI-based cybersecurity tool for ethical network reconnaissance. Built with Python and Tkinter, it features live packet sniffing, port scanning, and alert mechanisms for suspicious services — all wrapped in a hacker-style console interface.
 
 🚀 Features
