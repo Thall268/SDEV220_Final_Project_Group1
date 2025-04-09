@@ -34,16 +34,27 @@ threading – Parallel scanning/sniffing
 playsound – Sound feedback
 
 📂 File Structure
+
 bash
+
 Copy
+
 Edit
+
 Bloodhound/
+
 ├── BlooddhoundSDEV220Final.py       # Main app logic
+
 ├── bark.mp3                       # Alert sound (optional)
+
 ├── power_on_blip.mp3             # Startup sound (optional)
+
 ├── bloodhound_icon.png           # App icon (optional)
+
 └── packet_summary.txt            # Generated log (after sniffing)
+
 🛠️ Installation
+
 Clone or download this repo.
 
 Install dependencies:
@@ -77,8 +88,14 @@ Save Summary: Export protocol stats after sniffing stops.
 This tool is intended for educational and ethical use only. Unauthorized scanning or sniffing of networks you do not own or have explicit permission to test may violate laws and policies.
 
 👩‍💻 Author
+
 Project Manager: Tyler Hall
+
 GUI/ Front-End Dev: Nelson Marte
+
 Packet Sniffing: Juvens & Doniana 
+
 Port Scanning: Kezrae
-Securrity & Documentation: Clayton and Kavon 
+
+Securrity & Documentation: Clayton and Kavon
+
