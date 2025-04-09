@@ -4,6 +4,7 @@ SDEV220_Final_Project_Group1
 Bloodhound is a lightweight, GUI-based cybersecurity tool for ethical network reconnaissance. Built with Python and Tkinter, it features live packet sniffing, port scanning, and alert mechanisms for suspicious services — all wrapped in a hacker-style console interface.
 
 🚀 Features
+
 🎯 Target IP Selection: Easily set the IP address to scan.
 
 📡 Port Scanner: Scans a user-defined port range and identifies open ports.
@@ -19,6 +20,7 @@ Bloodhound is a lightweight, GUI-based cybersecurity tool for ethical network re
 🔊 Optional Sounds: Play alert or startup sounds to enhance feedback.
 
 🧰 Tech Stack
+
 Language: Python 3.x
 
 Libraries:
@@ -60,15 +62,23 @@ Clone or download this repo.
 Install dependencies:
 
 bash
+
 Copy
+
 Edit
+
 pip install scapy playsound
+
 Run the application:
 
 bash
+
 Copy
+
 Edit
+
 python "BloodhounSDEV220Final.py"
+
 ⚠️ Note: Running packet sniffing requires admin/root privileges.
 
 🧪 How to Use
