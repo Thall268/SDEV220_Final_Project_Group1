@@ -1,3 +1,4 @@
+"""Importing necessary libraries for networking, GUI, and system operations"""
 import ipaddress
 import os
 import socket
@@ -8,8 +9,11 @@ from tkinter import ttk
 from playsound import playsound
 from scapy.all import sniff
 
+# PacketSniffer class is responsible for sniffing network packets
+# Class for handling network packet sniffing
 class PacketSniffer:
     @staticmethod
+    # Start the packet sniffing thread
     def start_sniffing(packet_callback, is_sniffing):
         def stop_filter(_):
             return not is_sniffing()
@@ -21,7 +25,8 @@ class PacketSniffer:
         except Exception as sniff_error:
             packet_callback(f"[ERROR] {sniff_error}")
 
-
+# PortScanner class checks for open ports on a target IP address
+# Class for scanning ports in a given IP address range
 class PortScanner:
     def __init__(self, target_ip):
         self.target_ip = target_ip
@@ -32,7 +37,12 @@ class PortScanner:
             if not sock.connect_ex((self.target_ip, port)):
                 open_ports.append(port)
 
+    # Prompt for port range and perform scan
     def scan_ports(self, start_port, end_port):
+        """
+              Scans a range of ports in parallel using threads.
+              Returns a list of open ports.
+              """
         open_ports = []
         threads = []
         for port in range(start_port, end_port + 1):
@@ -42,26 +52,27 @@ class PortScanner:
         for thread in threads:
             thread.join()
         return open_ports
-
+# CyberGUI class creates the graphical interface for the network tool
+# Class that builds and manages the GUI for Bloodhound
 class CyberGUI:
     def __init__(self, root):
         self.exit_app = None
         self.status = None
         self.text_area = None
         self.root = root
-        self.root.title("Bloodhound")
-
-        self.packet_log = {}
+        self.root.title("Bloodhound") # The name of our security tool
+        # Variables and settings
+        self.packet_log = {} # Stores packet counts by protocol
         self.target_ip = None
         self.start_port = 20
         self.end_port = 100
         self.sniffing = False
         self.sniff_thread = None
         self.packet_sniffer = PacketSniffer()
-
-        self.theme_var = tk.StringVar(value="dark")
-        self.sound_enabled = tk.BooleanVar(value=True)
-
+        # User preferences
+        self.theme_var = tk.StringVar(value="dark") # Default to dark theme
+        self.sound_enabled = tk.BooleanVar(value=True) # Whether alerts should play sound
+        # List of potentially suspicious ports
         self.suspicious_ports = {
             23: "Telnet",
             3389: "Remote Desktop (RDP)",
@@ -75,13 +86,15 @@ class CyberGUI:
 
         self.setup_style()
         self.create_widgets()
-        self.root.protocol("WM_DELETE_WINDOW", self.on_close)
+        self.root.protocol("WM_DELETE_WINDOW", self.on_close) # Handle window close event
 
+    # Set the theme (dark/light) styling for the GUI
     def setup_style(self):
+        """ Configures the look of the GUI based on the selected theme. """
         style = ttk.Style()
         style.theme_use("clam")
         theme = self.theme_var.get()
-
+        # Differentiate between dark and light themes
         if theme == "dark":
             bg = "#111"
             fg = "#0f0"
@@ -92,19 +105,21 @@ class CyberGUI:
         style.configure("TButton", padding=6, relief="flat", background=bg, foreground=fg, font=('Consolas', 10))
         style.configure("TLabel", background=bg, foreground=fg, font=('Consolas', 10))
 
+    """ Sets up the buttons and display elements in the GUI. """
+    # Create and place all GUI widgets
     def create_widgets(self):
         main_frame = ttk.Frame(self.root)
         main_frame.pack(fill="both", expand=True)
-
+        # Sidebar for settings
         sidebar = ttk.Frame(main_frame, width=200)
         sidebar.pack(side="left", fill="y", padx=5, pady=5)
-
+        # Theme selection
         ttk.Label(sidebar, text="Settings").pack(anchor="w", pady=(0, 10))
         ttk.Checkbutton(sidebar, text="Enable Sound", variable=self.sound_enabled).pack(anchor="w", pady=2)
         ttk.Label(sidebar, text="Theme:").pack(anchor="w", pady=(10, 0))
         ttk.Radiobutton(sidebar, text="Dark", variable=self.theme_var, value="dark", command=self.refresh_theme).pack(anchor="w")
         ttk.Radiobutton(sidebar, text="Light", variable=self.theme_var, value="light", command=self.refresh_theme).pack(anchor="w")
-
+        # Console where logs are displayed
         console_frame = ttk.Frame(main_frame)
         console_frame.pack(side="right", fill="both", expand=True)
 
@@ -113,6 +128,7 @@ class CyberGUI:
         self.text_area.tag_config("alert", foreground="red", font=("Courier", 10, "bold"))
         self.text_area.tag_config("success", foreground="lime", font=("Courier", 10, "bold"))
 
+        # Buttons for user actions
         button_frame = ttk.Frame(console_frame)
         button_frame.pack(fill="x", pady=5)
 
@@ -127,11 +143,14 @@ class CyberGUI:
         self.status = ttk.Label(console_frame, text="Ready", anchor="w")
         self.status.pack(fill="x", padx=10, pady=(0, 10))
 
+    """ Updates the GUI theme dynamically. """
+    # Update the text area colors when the theme changes
     def refresh_theme(self):
         self.setup_style()
         self.text_area.config(bg="#111" if self.theme_var.get() == "dark" else "#fff",
                               fg="#0f0" if self.theme_var.get() == "dark" else "#000")
 
+    # Callback to handle each sniffed packet's data
     def packet_callback(self, packet):
         def update_ui():
             try:
@@ -145,9 +164,11 @@ class CyberGUI:
 
         self.root.after(0, update_ui)
 
+    """ Begins network packet sniffing. """
     def is_sniffing(self):
         return self.sniffing
 
+    # Start the packet sniffing thread
     def start_sniffing(self):
         if self.sniffing:
             self.status.config(text="Already sniffing...")
@@ -162,6 +183,7 @@ class CyberGUI:
         self.sniff_thread.daemon = True
         self.sniff_thread.start()
 
+    # Stop packet sniffing and display summary
     def stop_sniffing(self):
         if self.sniffing:
             self.sniffing = False
@@ -191,6 +213,7 @@ class CyberGUI:
         else:
             self.status.config(text="Not currently sniffing.")
 
+    # Save sniffed packet summary to a file
     def save_summary_as(self):
         if not self.packet_log:
             messagebox.showinfo("Info", "No packet data to save.")
@@ -213,6 +236,7 @@ class CyberGUI:
             except Exception as save_error:
                 messagebox.showerror("Error", f"Failed to save file: {save_error}")
 
+    # Prompt for port range and perform scan
     def scan_ports(self):
         if not self.target_ip:
             messagebox.showwarning("Warning", "Please enter a target IP first.")
@@ -255,6 +279,7 @@ class CyberGUI:
                 self.text_area.insert(tk.END, f"{line}\n", "alert")
             self.text_area.insert(tk.END, "\n")
 
+    # Prompt user to enter a target IP address
     def enter_ip(self):
         ip = simpledialog.askstring("Target IP", "Enter the target IP address:")
         if ip and self.validate_ip(ip):
@@ -266,6 +291,7 @@ class CyberGUI:
             messagebox.showerror("Error", "Invalid IP address.")
 
     @staticmethod
+    # Validate the format of an IP address
     def validate_ip(ip):
         try:
             ipaddress.ip_address(ip)
@@ -273,10 +299,12 @@ class CyberGUI:
         except ValueError:
             return False
 
+    # Clear the contents of the GUI text area
     def clear_text_area(self):
         self.text_area.delete(1.0, tk.END)
         self.status.config(text="Text area cleared.")
 
+    # Cleanup when closing the GUI
     def on_close(self):
         if self.sniffing:
             self.stop_sniffing()
