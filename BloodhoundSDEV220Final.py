@@ -29,14 +29,16 @@ class PacketSniffer:
 # Class for scanning ports in a given IP address range
 class PortScanner:
     def __init__(self, target_ip):
+        #Store the target IP address to be scanned
         self.target_ip = target_ip
 
     # Scans a single port to see if it's open by attempting a TCP connection
     def scan_port(self, port, open_ports):
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
-            sock.settimeout(1)
+            sock.settimeout(1) #Set timeout to avoid delays on closed ports
+            #Try to connect to the port; 0 means success
             if not sock.connect_ex((self.target_ip, port)):
-                open_ports.append(port)
+                open_ports.append(port) #Add to list of open ports
 
     # Prompt for port range and perform scan
     def scan_ports(self, start_port, end_port):
@@ -44,15 +46,19 @@ class PortScanner:
               Scans a range of ports in parallel using threads.
               Returns a list of open ports.
               """
-        open_ports = []
-        threads = []
+        open_ports = [] #List to store open ports
+        threads = [] # Track all threads for later synchronization 
+
+        #Create and start a thread for each port in the range
         for port in range(start_port, end_port + 1):
             thread = threading.Thread(target=self.scan_port, args=(port, open_ports))
             thread.start()
             threads.append(thread)
+        # Wait for all threads to finish before returning results    
         for thread in threads:
             thread.join()
-        return open_ports
+        return open_ports # Return the list of open ports found
+        
 # CyberGUI class creates the graphical interface for the network tool
 # Class that builds and manages the GUI for Bloodhound
 class CyberGUI:
