@@ -31,6 +31,7 @@ class PortScanner:
     def __init__(self, target_ip):
         self.target_ip = target_ip
 
+    # Scans a single port to see if it's open by attempting a TCP connection
     def scan_port(self, port, open_ports):
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
             sock.settimeout(1)
