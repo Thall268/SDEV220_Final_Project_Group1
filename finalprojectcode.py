@@ -9,6 +9,9 @@ from tkinter import scrolledtext, simpledialog, messagebox, filedialog  # GUI co
 from tkinter import ttk  # Themed widgets for better UI styling
 from playsound import playsound  # Allows audio playback (useful for alerts)
 from scapy.all import sniff  # Captures and analyzes network packets
+from scapy.utils import wrpcap
+from datetime import datetime
+
 
 # PacketSniffer class is responsible for sniffing network packets
 class PacketSniffer:
@@ -74,6 +77,7 @@ class CyberGUI:
         self.sniffing = False
         self.sniff_thread = None
         self.packet_sniffer = PacketSniffer()
+        self.captured_packets = [] # Store packets for export
 
         # User preferences
         self.theme_var = tk.StringVar(value="dark")  # Default to dark theme
@@ -138,6 +142,8 @@ class CyberGUI:
         ttk.Button(button_frame, text="Scan Ports", command=self.scan_ports).pack(side="left", padx=5)
         ttk.Button(button_frame, text="Start Sniffing", command=self.start_sniffing).pack(side="left", padx=5)
         ttk.Button(button_frame, text="Stop Sniffing", command=self.stop_sniffing).pack(side="left", padx=5)
+        ttk.Button(button_frame, text="Export Packets", command=self.export_pcap).pack(side="left", padx=5)
+
 
         self.status = ttk.Label(console_frame, text="Ready", anchor="w")
         self.status.pack(fill="x", padx=10, pady=(0, 10))
@@ -147,7 +153,45 @@ class CyberGUI:
         self.setup_style()
         self.text_area.config(bg="#111" if self.theme_var.get() == "dark" else "#fff",
                               fg="#0f0" if self.theme_var.get() == "dark" else "#000")
+        
+    def export_pcap(self):
+    """ Exports captured packets to a timestamped .pcap file. """
+    if not self.captured_packets:
+        messagebox.showinfo("Export Failed", "No packets have been captured.")
+        return
 
+    # Generate a timestamped filename
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    default_filename = f"capture_{timestamp}.pcap"
+
+    file_path = filedialog.asksaveasfilename(
+        initialfile=default_filename,
+        defaultextension=".pcap",
+        filetypes=[("PCAP files", "*.pcap")]
+    )
+
+    if file_path:
+        try:
+            wrpcap(file_path, self.captured_packets)
+            messagebox.showinfo("Success", f"Packets saved to:\n{file_path}")
+        except Exception as e:
+            messagebox.showerror("Export Error", f"Could not save file:\n{e}")
+
+
+    def packet_callback(self, packet):
+        '''Called for each captured packet'''
+        # Save the packet to the captured_packet list
+        self.captured_packets.append(packet)
+        
+        # Extract and log protocol summary
+        proto = packet.summary().split()[0]
+        self.packet_log[proto] = self.packet_log.get(proto, 0) + 1
+        
+        # Optionally, show packet summary in the GUI
+        self.text_area.insert(tk.END, f"{packet.summary()}\n")
+        self.text_area.yview(tk.END)
+    
+    
     def start_sniffing(self):
         """ Begins network packet sniffing. """
         if self.sniffing:
@@ -159,8 +203,7 @@ class CyberGUI:
         self.sniff_thread = threading.Thread(target=self.packet_sniffer.start_sniffing, args=(self.packet_callback, self.is_sniffing))
         self.sniff_thread.daemon = True
         self.sniff_thread.start()
-
-
+        
         # Attempt to get port range from user input while handling potential errors
         try:
             # Get user input for start and end ports, with default values if left blank
