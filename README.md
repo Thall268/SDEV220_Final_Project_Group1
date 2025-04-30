@@ -101,7 +101,7 @@ This tool is intended for educational and ethical use only. Unauthorized scannin
 
 Project Manager: Tyler Hall
 
-GUI/ Front-End Dev: Nelson Marte
+GUI/ Front-End Dev: Tyler Hall
 
 Packet Sniffing: Juvens & Doniana 
 
